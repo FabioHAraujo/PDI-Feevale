@@ -1,0 +1,39 @@
+{
+  "name": "primevue_demo",
+  "description": "**** PrimeVue is an open source UI library for Vue featuring a rich set of 80+ components, a theme designer, various theme alternatives such as Material, Bootstrap, Tailwind, premium templates and professional support. In addition, it integrates with PrimeBlock, which has 400+ ready to use UI blocks to build spectacular applications in no time.",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "electron:build": "vue-cli-service electron:build",
+    "electron:serve": "vue-cli-service electron:serve",
+    "postinstall": "electron-builder install-app-deps",
+    "postuninstall": "electron-builder install-app-deps",
+    "preview": "vite preview"
+  },
+  "main": "background.js",
+  "dependencies": {
+    "@primevue/auto-import-resolver": "4.0.5",
+    "@primevue/themes": "4.0.5",
+    "@vitejs/plugin-vue": "^4.0.0",
+    "autoprefixer": "^10.4.16",
+    "axios": "^1.7.7",
+    "electron-context-menu": "^4.0.2",
+    "oh-vue-icons": "^1.0.0-rc3",
+    "pocketbase": "^0.21.5",
+    "postcss": "^8.4.31",
+    "primeicons": "^7.0.0",
+    "primevue": "4.0.5",
+    "tailwindcss": "^3.4.1",
+    "tailwindcss-primeui": "^0.3.2",
+    "unplugin-vue-components": "latest",
+    "vite": "^4.0.0",
+    "vue": "^3.2.45"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "^5.0.8",
+    "electron": "^13.6.9",
+    "electron-devtools-installer": "^3.1.0",
+    "vue-cli-plugin-electron-builder": "~2.1.1"
+  },
+  "keywords": []
+}
