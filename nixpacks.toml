@@ -1,8 +1,7 @@
-[[phases.install]]
-cmds = ["npm install"]
+providers = ["node"]
 
-[[phases.build]]
-cmds = ["npm run build"]
+[install]
+cmd = "npm install"
 
-[[phases.start]]
-cmds = ["npm run dev"]
+[start]
+cmd = "npm run dev"
