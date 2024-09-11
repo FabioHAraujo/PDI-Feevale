@@ -128,7 +128,7 @@ export const items = ref([
                 ]
             },
             {
-                label: 'Extração de Características',
+                label: 'Extração de Características 2',
                 icon: 'pi pi-chevron-right',
                 items: [
                     {
