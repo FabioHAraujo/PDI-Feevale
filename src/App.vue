@@ -162,7 +162,7 @@
                     <template #empty>
                         <div class="flex items-center justify-center flex-col">
                             <i class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color" />
-                            <p class="mt-6 mb-0">Isto será revertido em seguida</p>
+                            <p class="mt-6 mb-0">Arraste uma imagem até aqui para fazer upload</p>
                         </div>
                     </template>
                 </FileUpload>
