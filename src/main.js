@@ -31,8 +31,6 @@ import Dialog from 'primevue/dialog';
 import Select from 'primevue/select';
 
 
-
-
 // Importação de ícones
 import { addIcons } from "oh-vue-icons";
 import { CoResizeBoth } from "oh-vue-icons/icons";
