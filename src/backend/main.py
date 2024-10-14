@@ -8,6 +8,9 @@ import mirror
 import rotate
 import scale
 import translate
+import grayscale
+import bright
+import contrast
 
 def enviar_para_pocketbase(imagem, nome_original, formato_original):
     try:
@@ -52,7 +55,7 @@ def main():
     # Configura o parser de argumentos
     parser = argparse.ArgumentParser(description="Aplicar operações em uma imagem e enviá-la para PocketBase.")
     parser.add_argument('image_path', type=str, help="Caminho para o arquivo da imagem.")
-    parser.add_argument('operation', type=str, choices=['translacao', 'escala', 'rotacao', 'espelhamento'], help="Operação a ser realizada na imagem.")
+    parser.add_argument('operation', type=str, choices=['translacao', 'escala', 'rotacao', 'espelhamento', 'grayscale', 'brilho', 'contraste'], help="Operação a ser realizada na imagem.")
     parser.add_argument('params', type=str, nargs='*', help="Parâmetros adicionais para a operação escolhida.")
 
     args = parser.parse_args()
@@ -106,6 +109,27 @@ def main():
             return
 
         img = mirror.mirror_image(img, axis)
+
+    elif args.operation == 'grayscale':
+        img = grayscale.grayscale(img)
+    
+    elif args.operation == 'brilho':
+        if len(params) != 1:
+            print("Erro: Brilho requer um parâmetro (intensidade do brilho de 0 a 100).")
+            return
+        brilho = params[0]/100
+        img = bright.bright_adjust(img, brilho)
+        
+    elif args.operation == 'contraste':
+        if len(params) != 1:
+            print("Erro: Contraste requer um parâmetro (intensidade do contraste de 0 a 20000).")
+            return
+        if params[0] > 20000:
+            print("Tá doidão moço? Chega já, bota menos que 20k aí")
+            return
+        contraste = params[0]/100
+        img = contrast.contrast_adjust(img, contraste)
+        
 
     # Envia a imagem processada com o formato original para o PocketBase
     enviar_para_pocketbase(img, args.image_path, formato_original)

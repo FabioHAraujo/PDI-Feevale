@@ -9,6 +9,9 @@ import translate
 import tempfile
 import subprocess
 import json
+import grayscale
+import bright
+import contrast
 
 app = FastAPI()
 
@@ -16,7 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080", "https://pdiprojeto.fabioharaujo.com.br", "http://localhost:5173", "http://localhost:39200/", "http://192.168.1.5:39200/"],  # Substitua pelo URL do seu front-end
+    allow_origins=["http://localhost:8080", "https://pdiprojeto.fabioharaujo.com.br", "http://localhost:5173", "http://localhost:39200"],  # Substitua pelo URL do seu front-end
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -102,6 +105,25 @@ async def processar_imagem(
             if axis is None:
                 return JSONResponse(status_code=400, content={"message": "Parâmetro inválido. Use 1 para vertical ou 2 para horizontal."})
             img = mirror.mirror_image(img, axis)
+            
+        elif operation == 'grayscale':
+            img = grayscale.grayscale(img)
+            
+        elif operation == 'brilho':
+            if len(params_list) != 1:
+                return JSONResponse(status_code=400, content={"message": "Brilho requer um parâmetro (intensidade do brilho de 0 a 100)."})
+            brilho = params_list[0]/100
+            img = bright.bright_adjust(img, brilho)
+            
+        elif operation == 'contraste':
+            if len(params_list) != 1:
+                return JSONResponse(status_code=400, content={"message": "Contraste requer um parâmetro (intensidade do contraste de 0 a 20000)."})
+            if params_list[0] > 20000:
+                print("Tá doidão moço? Chega já, bota menos que 20k aí")
+                return
+            contraste = params_list[0]/100
+            img = contrast.contrast_adjust(img, contraste)
+        
 
         else:
             return JSONResponse(status_code=400, content={"message": "Operação inválida."})
@@ -114,4 +136,4 @@ async def processar_imagem(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=39000)
