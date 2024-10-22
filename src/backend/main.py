@@ -11,6 +11,14 @@ import translate
 import grayscale
 import bright
 import contrast
+import dilate
+import erode
+import threshold
+import median
+import gaussian
+import sobel
+import prewitt
+import laplacian
 
 def enviar_para_pocketbase(imagem, nome_original, formato_original):
     try:
@@ -55,7 +63,7 @@ def main():
     # Configura o parser de argumentos
     parser = argparse.ArgumentParser(description="Aplicar operações em uma imagem e enviá-la para PocketBase.")
     parser.add_argument('image_path', type=str, help="Caminho para o arquivo da imagem.")
-    parser.add_argument('operation', type=str, choices=['translacao', 'escala', 'rotacao', 'espelhamento', 'grayscale', 'brilho', 'contraste'], help="Operação a ser realizada na imagem.")
+    parser.add_argument('operation', type=str, choices=['translacao', 'escala', 'rotacao', 'espelhamento', 'grayscale', 'brilho', 'contraste', 'dilatacao', 'erosao', 'limiarizacao', 'mediana', 'gaussiano', 'sobel', 'prewitt', 'laplaciano'], help="Operação a ser realizada na imagem.")
     parser.add_argument('params', type=str, nargs='*', help="Parâmetros adicionais para a operação escolhida.")
 
     args = parser.parse_args()
@@ -129,7 +137,48 @@ def main():
             return
         contraste = params[0]/100
         img = contrast.contrast_adjust(img, contraste)
+
+    elif args.operation == 'dilatacao':
+        if len(params) != 1:
+            print("Erro: Dilatação requer um parâmetro (tamanho do kernel).")
+            return
+        kernel_size = int(params[0])
+        img = dilate.dilate_image(img, kernel_size)
+    elif args.operation == 'erosao':
+        if len(params) != 1:
+            print("Erro: Erosão requer um parâmetro (tamanho do kernel).")
+            return
+        kernel_size = int(params[0])
+        img = erode.erode_image(img, kernel_size)
         
+    elif args.operation == 'limiarizacao':
+        if len(params) != 1:
+            print("Erro: Limiarização requer um parâmetro (valor do limiar).")
+            return
+        threshold_value = int(params[0])
+        img = threshold.threshold_image(img, threshold_value)
+        
+    elif args.operation == 'media':
+        if len(params) != 1:
+            print("Erro: Média requer um parâmetro (tamanho do kernel).")
+            return
+        kernel_size = int(params[0])
+        img = median.median_filter(img, kernel_size)
+        
+    elif args.operation == 'gaussiano':
+        img = gaussian.gaussian_blur(img)
+        
+    elif args.operation == 'sobel':
+        img = sobel.sobel_filter(img)
+        
+    elif args.operation == 'prewitt':
+        img = prewitt.prewitt_filter(img)
+        
+    elif args.operation == 'laplaciano':
+        img = laplacian.laplacian_filter(img)
+
+
+
 
     # Envia a imagem processada com o formato original para o PocketBase
     enviar_para_pocketbase(img, args.image_path, formato_original)
