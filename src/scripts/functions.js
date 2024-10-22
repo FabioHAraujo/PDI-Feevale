@@ -43,6 +43,16 @@ export const showEspelharModal = ref(false);
 export const showAumentarModal = ref(false);
 export const showDiminuirModal = ref(false);
 
+// Filtros
+export const showGrayscaleModal = ref(false);
+export const showLimiarModal = ref(false);
+export const showMedianaModal = ref(false);
+export const showGaussianoModal = ref(false);
+export const showSobelModal = ref(false);
+export const showLaplaceModal = ref(false);
+
+
+
 export const abrirTransladarModal = () => {
     showTransladarModal.value = true;
 };

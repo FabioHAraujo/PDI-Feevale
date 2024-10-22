@@ -255,13 +255,22 @@ async function baixarImagem() {
 
 // Função para aplicar a translação
 async function aplicarTranslacao() {
-    const url = await aplicarTranslacaoBackend(translacao.value, selectedImage.value);
-    if (url) {
-        imagemProcessadaUrl.value = url;
-        translacao.value.dx = 0;
-        translacao.value.dy = 0;
+    try {
+        const url = await aplicarTranslacaoBackend(translacao.value, selectedImage.value);
+        if (url) {
+            imagemProcessadaUrl.value = url;
+            translacao.value.dx = 0;
+            translacao.value.dy = 0;
+            alert('Translação aplicada com sucesso!'); // Feedback ao usuário
+        } else {
+            alert('Erro ao aplicar a translação.');
+        }
+    } catch (error) {
+        console.error('Erro ao aplicar a translação:', error);
+        alert('Erro ao aplicar a translação. Tente novamente.');
     }
 }
+
 
 // Função para aplicar a rotação
 async function aplicarRotacao() {

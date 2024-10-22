@@ -12,6 +12,14 @@ import json
 import grayscale
 import bright
 import contrast
+import dilate
+import erode
+import threshold
+import median
+import gaussian
+import sobel
+import prewitt
+import laplacian
 
 app = FastAPI()
 
@@ -19,11 +27,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080", "https://pdiprojeto.fabioharaujo.com.br", "http://localhost:5173", "http://localhost:39200"],  # Substitua pelo URL do seu front-end
+    allow_origins=["*"],  # Permite todos os domínios
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 def enviar_para_pocketbase(imagem, nome_original, formato_original):
     try:
@@ -60,12 +69,11 @@ def enviar_para_pocketbase(imagem, nome_original, formato_original):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.post("/processar_imagem/")
 async def processar_imagem(
     image: UploadFile = File(...),
     operation: str = Form(...),
-    params: str = Form(...)
+    params: str = Form(...),
 ):
     try:
         img = Image.open(image.file)
@@ -119,11 +127,45 @@ async def processar_imagem(
             if len(params_list) != 1:
                 return JSONResponse(status_code=400, content={"message": "Contraste requer um parâmetro (intensidade do contraste de 0 a 20000)."})
             if params_list[0] > 20000:
-                print("Tá doidão moço? Chega já, bota menos que 20k aí")
-                return
+                return JSONResponse(status_code=400, content={"message": "Parâmetro inválido: valor máximo é 20000."})
             contraste = params_list[0]/100
             img = contrast.contrast_adjust(img, contraste)
+
+        elif operation == 'dilatacao':
+            if len(params_list) != 1:
+                return JSONResponse(status_code=400, content={"message": "Dilatação requer um parâmetro (tamanho do kernel)."})
+            kernel_size = int(params_list[0])
+            img = dilate.dilate_image(img, kernel_size)
+
+        elif operation == 'erosao':
+            if len(params_list) != 1:
+                return JSONResponse(status_code=400, content={"message": "Erosão requer um parâmetro (tamanho do kernel)."})
+            kernel_size = int(params_list[0])
+            img = erode.erode_image(img, kernel_size)
         
+        elif operation == 'limiarizacao':
+            if len(params_list) != 1:
+                return JSONResponse(status_code=400, content={"message": "Limiarização requer um parâmetro (valor do limiar)."})
+            threshold_value = int(params_list[0])
+            img = threshold.threshold_image(img, threshold_value)
+
+        elif operation == 'media':
+            if len(params_list) != 1:
+                return JSONResponse(status_code=400, content={"message": "Média requer um parâmetro (tamanho do kernel)."})
+            kernel_size = int(params_list[0])
+            img = median.median_filter(img, kernel_size)
+
+        elif operation == 'gaussiano':
+            img = gaussian.gaussian_blur(img)
+
+        elif operation == 'sobel':
+            img = sobel.sobel_filter(img)
+
+        elif operation == 'prewitt':
+            img = prewitt.prewitt_filter(img)
+
+        elif operation == 'laplaciano':
+            img = laplacian.laplacian_filter(img)
 
         else:
             return JSONResponse(status_code=400, content={"message": "Operação inválida."})

@@ -92,15 +92,23 @@ export const items = ref([
                         icon: 'pi pi-circle-on',
                     },
                     {
-                        label: 'Passa Baixa',
+                        label: 'Limiarização',
                         icon: 'pi pi-circle-on',
                     },
                     {
-                        label: 'Passa Alta',
+                        label: 'Mediana',
                         icon: 'pi pi-circle-on',
                     },
                     {
-                        label: 'Threshold',
+                        label: 'Gausiano',
+                        icon: 'pi pi-circle-on',
+                    },
+                    {
+                        label: 'Sobel',
+                        icon: 'pi pi-circle-on',
+                    },
+                    {
+                        label: 'Laplace (Extra)',
                         icon: 'pi pi-circle-on',
                     },
                 ]
