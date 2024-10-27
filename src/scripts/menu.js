@@ -5,7 +5,9 @@ import {
     abrirRotacionarModal,
     abrirEspelharModal,
     abrirAumentarModal,
-    abrirDiminuirModal
+    abrirDiminuirModal,
+    imagemAtual,
+    desfazerUltimaOperacao
 } from './functions.js';
 
 // Definição do menu com o item "Últimas Imagens" usando a ref quantidadeImagens para o badge
@@ -153,6 +155,11 @@ export const items = ref([
         badge: quantidadeImagens, // Usando a ref quantidadeImagens para o badge
         items: itens.value.length > 0 ? itens.value : [], // Mostrar array vazio se não houver itens
         class: 'scrollable-dropdown' // Adiciona a classe para limitar o tamanho
+    },
+    {
+        label: 'Desfazer',
+        icon: 'pi pi-undo',
+        command: () => desfazerUltimaOperacao()
     },
 ]);
 

@@ -4,6 +4,40 @@ import axios from 'axios';
 // Criação de uma variável reativa para controlar o modal
 const imagemModal = ref(null);
 
+// Controle da imagem
+export const historicoImagens = ref([]);
+export const historicoImagensUrl = ref([]);
+export const imagemAtual = ref(null);
+export const ultimaImagem = ref(null);
+
+
+export const addImagemAoHistorico = async (imagemUrl) => {
+    // Converte a URL da imagem em um arquivo blob
+    const response = await fetch(imagemUrl);
+    const blob = await response.blob();
+    const file = new File([blob], 'imagem-processada.png', { type: blob.type });
+
+    // Adiciona o arquivo ao histórico
+    historicoImagens.value.push(file);
+    historicoImagensUrl.value.push(imagemUrl);
+};
+
+export function addImagem(url){
+    historicoImagens.value.push(url);
+}
+
+export function desfazerUltimaOperacao() {
+    if (historicoImagens.value.length > 0) {
+        historicoImagensUrl.value.pop();
+        imagemAtual.value = historicoImagensUrl.value.pop();
+        historicoImagens.value.pop();
+        console.log("Desfeito, atual: ", imagemAtual);
+    } else {
+        alert('Nenhuma operação para desfazer.');
+    }
+}
+
+
 // Função para abrir a imagem no modal
 export function abrirImagem(item) {
     if (item) {
@@ -60,12 +94,18 @@ export const abrirTransladarModal = () => {
 // Função para aplicar a translação
 export const aplicarTranslacao = async (translacao, selectedImage) => {
     console.log('Translação:', translacao);
-    console.log('Imagem selecionada:', selectedImage);
 
-    if (translacao && typeof translacao.dx === 'number' && typeof translacao.dy === 'number' && selectedImage) {
+    // Usa a última imagem do histórico se houver, caso contrário usa `selectedImage`
+    const imagemEntrada = historicoImagens.value.length > 0 
+        ? historicoImagens.value[historicoImagens.value.length - 1] 
+        : selectedImage;
+
+    console.log('Imagem a ser transladada:', imagemEntrada);
+
+    if (translacao && typeof translacao.dx === 'number' && typeof translacao.dy === 'number' && imagemEntrada) {
         try {
             const formData = new FormData();
-            formData.append('image', selectedImage);  // Usa o arquivo selecionado
+            formData.append('image', imagemEntrada);  // Usa a última imagem processada ou a imagem inicial
             formData.append('operation', 'translacao');
             formData.append('params', `${translacao.dx},${translacao.dy}`);
 
@@ -77,7 +117,12 @@ export const aplicarTranslacao = async (translacao, selectedImage) => {
 
             if (response.status === 200) {
                 console.log('Imagem processada e enviada com sucesso!');
-                const imagemUrl = response.data.url;  // Certifique-se de que este campo está no retorno da API
+                const imagemUrl = response.data.url; // URL da imagem processada retornada pela API
+                imagemAtual.value = response.data.url;
+                
+                // Adiciona a nova imagem processada ao histórico como um arquivo
+                await addImagemAoHistorico(imagemUrl);
+
                 return imagemUrl;
             } else {
                 console.error('Falha ao processar a imagem:', response.data.message);
@@ -93,7 +138,6 @@ export const aplicarTranslacao = async (translacao, selectedImage) => {
         console.error("Translação ou imagem inválida.");
         return null;
     }
-    
 };
 
 // Função para abrir o modal de rotação

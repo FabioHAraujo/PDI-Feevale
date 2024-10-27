@@ -152,7 +152,7 @@
                                         </span>
                                         <div>{{ formatSize(file.size) }}</div>
                                         <Badge value="Completed" class="mt-4" severity="success" />
-                                        <Button icon="pi pi-times" @click="removeUploadedFileCallback(index)" outlined
+                                        <Button icon="pi pi-times" @click="executarRemocaoEReset(index)" outlined
                                             rounded severity="danger" />
                                     </div>
                                 </div>
@@ -172,9 +172,9 @@
                 <Divider layout="vertical" class="hidden md:flex"><b>PROCESSE SUA IMAGEM NO MENU</b></Divider>
             </div>
             <div class="w-full md:w-5/12 flex items-center justify-center py-5">
-                <div v-if="imagemProcessadaUrl" class="card">
+                <div v-if="imagemAtual" class="card">
                     <p class="mt-6 mb-0"><b>Imagem Processada</b></p>
-                    <img :src="imagemProcessadaUrl" alt="Imagem Processada" class="w-full" />
+                    <img :src="imagemAtual" alt="Imagem Processada" class="w-full" />
                     <div class="mt-4">
                         <Button label="Baixar Imagem" @click="baixarImagem" />
                     </div>
@@ -206,10 +206,17 @@ import {
     aplicarRotacao as aplicarRotacaoBackend,
     aplicarEspelhamento as aplicarEspelhamentoBackend,
     aplicarAumento as aplicarAumentoBackend,
-    aplicarDiminuicao as aplicarDiminuicaoBackend
+    aplicarDiminuicao as aplicarDiminuicaoBackend,
+    historicoImagens as affsCansei,
+    imagemAtual
 } from './scripts/functions.js';
 
 import { items } from './scripts/menu.js';
+
+const imagemSalva = sessionStorage.getItem('imagemProcessada');
+if (imagemSalva) {
+    imagemProcessada.value = imagemSalva;
+}
 
 const translacao = ref({ dx: 0, dy: 0 });
 const rotacao = ref({angulo: 0}); // Número simples para rotação
@@ -217,6 +224,7 @@ const aumento = ref(1); // Número simples para aumento
 const diminuicao = ref(1); // Número simples para diminuição
 const selectedImage = ref(null);  // Variável para armazenar a imagem selecionada
 const imagemProcessadaUrl = ref(null);  // Variável para armazenar a URL da imagem processada
+const historicoImagens = ref([]); // Array para armazenar o histórico de imagens
 const imagemSelecionada = ref(null);
 const espelhamento = ref();
 const eixos = ref([
@@ -253,15 +261,25 @@ async function baixarImagem() {
     }
 }
 
+function executarRemocaoEReset(index) {
+    removeUploadedFileCallback(index); // Chama a função de remoção
+    imagemProcessadaUrl.value = null;  // Limpa a URL da imagem processada
+    historicoImagens.value = []; // Opcional: limpa o histórico
+}
+
+
 // Função para aplicar a translação
 async function aplicarTranslacao() {
     try {
-        const url = await aplicarTranslacaoBackend(translacao.value, selectedImage.value);
+        const url = await aplicarTranslacaoBackend(translacao.value, selectedImage.value || imagemProcessadaUrl.value);
         if (url) {
-            imagemProcessadaUrl.value = url;
+            imagemProcessadaUrl.value = url; // Atualiza a imagem processada atual
+            historicoImagens.value.push(imagemProcessadaUrl.value); // Adiciona a imagem anterior ao histórico
+            console.log("Imagens transladadas:", historicoImagens.value);
+            console.log(affsCansei);
+
             translacao.value.dx = 0;
             translacao.value.dy = 0;
-            alert('Translação aplicada com sucesso!'); // Feedback ao usuário
         } else {
             alert('Erro ao aplicar a translação.');
         }
@@ -270,6 +288,16 @@ async function aplicarTranslacao() {
         alert('Erro ao aplicar a translação. Tente novamente.');
     }
 }
+
+function desfazerUltimaOperacao() {
+    if (historicoImagens.value.length > 0) {
+        imagemProcessadaUrl.value = historicoImagens.value.pop(); // Remove a última imagem do histórico
+        alert('Última operação desfeita.');
+    } else {
+        alert('Não há operações para desfazer.');
+    }
+}
+
 
 
 // Função para aplicar a rotação
@@ -320,6 +348,8 @@ function onSelectedFiles(event) {
 // Função para remover um arquivo da lista
 function onRemoveTemplatingFile(file, removeFileCallback, index) {
     removeFileCallback(index);
+    imagemProcessadaUrl.value = null;  // Limpa a URL da imagem processada
+    historicoImagens.value = []; // Opcional: limpa o histórico
     // Verifica se a imagem removida era a selecionada
     if (imagemSelecionada.value && imagemSelecionada.value.name === file.name) {
         imagemSelecionada.value = null; // Limpa a imagem selecionada
