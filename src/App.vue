@@ -97,6 +97,72 @@
         </div>
     </Dialog>
 
+    <!-- Modal de Grayscale -->
+    <Dialog header="Aplicar Grayscale" v-model:visible="showGrayscaleModal" :modal="true" :closable="true">
+        <div>
+            <p>Você deseja aplicar a conversão para escala de cinza à imagem atual?</p>
+        </div>
+        <div class="mt-4 flex justify-end">
+            <Button label="Sim" @click="aplicarGrayscale" />
+            <Button label="Cancelar" @click="showGrayscaleModal = false" class="ml-2" />
+        </div>
+    </Dialog>
+
+    <!-- Modal de Limiarização -->
+    <Dialog header="Limiarizar Imagem" v-model:visible="showLimiarModal" :modal="true" :closable="true">
+        <div>
+            <label for="fator-limiar">Fator de Limiarização:</label>
+            <InputNumber v-model="escala.fator" id="fator-limiar" />
+        </div>
+        <div class="mt-4 flex justify-end">
+            <Button label="Aplicar" @click="aplicarLimiar(escala.fator)" />
+        </div>
+    </Dialog>
+
+    <!-- Modal de Mediana -->
+    <Dialog header="Mediana da Imagem" v-model:visible="showMedianaModal" :modal="true" :closable="true">
+        <div>
+            <label for="fator-limiar">Fator de Kernel:</label>
+            <InputNumber v-model="escala.kernelSize" id="fator-mediana" />
+        </div>
+        <div class="mt-4 flex justify-end">
+            <Button label="Aplicar" @click="aplicarMediana(escala.kernelSize)" />
+        </div>
+    </Dialog>
+
+    <!-- Modal de Gaussiano -->
+    <Dialog header="Aplicar Gaussiano" v-model:visible="showGaussianoModal" :modal="true" :closable="true">
+        <div>
+            <p>Você deseja aplicar o filtro Gaussiano à imagem atual?</p>
+        </div>
+        <div class="mt-4 flex justify-end">
+            <Button label="Sim" @click="aplicarGaussiano" />
+            <Button label="Cancelar" @click="showGaussianoModal = false" class="ml-2" />
+        </div>
+    </Dialog>
+
+    <!-- Modal de Laplaciano -->
+    <Dialog header="Aplicar Sobel" v-model:visible="showSobelModal" :modal="true" :closable="true">
+        <div>
+            <p>Você deseja aplicar a detecção de bordas de Sobel na imagem atual?</p>
+        </div>
+        <div class="mt-4 flex justify-end">
+            <Button label="Sim" @click="aplicarSobel" />
+            <Button label="Cancelar" @click="showSobelModal = false" class="ml-2" />
+        </div>
+    </Dialog>
+
+    <!-- Modal de Laplaciano -->
+    <Dialog header="Aplicar Laplaciano" v-model:visible="showLaplaceModal" :modal="true" :closable="true">
+        <div>
+            <p>Você deseja aplicar a detecção de bordas laplaciano na imagem atual?</p>
+        </div>
+        <div class="mt-4 flex justify-end">
+            <Button label="Sim" @click="aplicarLaplaciano" />
+            <Button label="Cancelar" @click="showLaplaceModal = false" class="ml-2" />
+        </div>
+    </Dialog>
+
     <div class="card">
         <div class="flex flex-col md:flex-row">
             <div class="w-full md:w-5/12 flex flex-col items-center justify-center gap-3 py-5">
@@ -202,14 +268,26 @@ import {
     showEspelharModal,
     showAumentarModal,
     showDiminuirModal,
+    showGrayscaleModal,
+    showLimiarModal,
     aplicarTranslacao as aplicarTranslacaoBackend,
     aplicarRotacao as aplicarRotacaoBackend,
     aplicarEspelhamento as aplicarEspelhamentoBackend,
     aplicarAumento as aplicarAumentoBackend,
     aplicarDiminuicao as aplicarDiminuicaoBackend,
+    aplicarGrayscale as aplicarGrayscaleBackend,
+    aplicarLimiar as aplicarLimiarBackend,
+    aplicarMediana as aplicarMedianaModalBackend,
+    aplicarGaussiano as aplicarGaussianoBackend,
+    aplicarSobel as aplicarSobelBackend,
+    aplicarLaplaciano as aplicarLaplacianoBackend,
     historicoImagens,
     imagemAtual,
-    historicoImagensUrl
+    historicoImagensUrl,
+    showMedianaModal,
+    showGaussianoModal,
+    showSobelModal,
+    showLaplaceModal
 } from './scripts/functions.js';
 
 import { items } from './scripts/menu.js';
@@ -289,41 +367,203 @@ async function aplicarTranslacao() {
     }
 }
 
-// Função para aplicar a rotação
+// Função para aplicar a rotação com histórico e undo
 async function aplicarRotacao() {
-    const url = await aplicarRotacaoBackend(rotacao.value.angulo, selectedImage.value);
-    if (url) {
-        imagemProcessadaUrl.value = url;
-        rotacao.value.angulo = 0;
+    try {
+        const url = await aplicarRotacaoBackend(rotacao.value.angulo, selectedImage.value || imagemProcessadaUrl.value);
+        if (url) {
+            imagemProcessadaUrl.value = url; // Atualiza a imagem processada atual
+            historicoImagensUrl.value.push(imagemProcessadaUrl.value); // Adiciona a imagem anterior ao histórico
+            console.log("Imagens rotacionadas:", historicoImagens.value);
+            console.log(historicoImagensUrl);
+
+            rotacao.value.angulo = 0;
+        } else {
+            alert('Erro ao aplicar a rotação.');
+        }
+    } catch (error) {
+        console.error('Erro ao aplicar a rotação:', error);
+        alert('Erro ao aplicar a rotação. Tente novamente.');
     }
 }
 
-// Função para aplicar o espelhamento
+
+// Função para aplicar o espelhamento com histórico e undo
 async function aplicarEspelhamento() {
-    const url = await aplicarEspelhamentoBackend(espelhamento.value.code, selectedImage.value);
-    if (url) {
-        imagemProcessadaUrl.value = url;
-        espelhamento.value = 'horizontal'; // Resetando para valor padrão
+    try {
+        const url = await aplicarEspelhamentoBackend(espelhamento.value, selectedImage.value || imagemProcessadaUrl.value);
+        if (url) {
+            imagemProcessadaUrl.value = url; // Atualiza a imagem processada atual
+            historicoImagensUrl.value.push(imagemProcessadaUrl.value); // Adiciona a imagem anterior ao histórico
+            console.log("Imagens espelhadas:", historicoImagens.value);
+            console.log(historicoImagensUrl);
+
+            espelhamento.value = 'horizontal'; // Resetando para o valor padrão
+        } else {
+            alert('Erro ao aplicar o espelhamento.');
+        }
+    } catch (error) {
+        console.error('Erro ao aplicar o espelhamento:', error);
+        alert('Erro ao aplicar o espelhamento. Tente novamente.');
     }
 }
 
-// Função para aplicar o aumento
+
+// Função para aplicar o aumento com histórico e undo
 async function aplicarAumento() {
-    const url = await aplicarAumentoBackend(escala.value.fator, selectedImage.value);
-    if (url) {
-        imagemProcessadaUrl.value = url;
-        escala.value.fator=0; // Resetando para valor padrão
+    try {
+        const url = await aplicarAumentoBackend(escala.value.fator, selectedImage.value || imagemProcessadaUrl.value);
+        if (url) {
+            imagemProcessadaUrl.value = url; // Atualiza a imagem processada atual
+            historicoImagensUrl.value.push(imagemProcessadaUrl.value); // Adiciona a imagem anterior ao histórico
+            console.log("Imagens aumentadas:", historicoImagens.value);
+            console.log(historicoImagensUrl);
+
+            escala.value.fator = 0; // Resetando para o valor padrão
+        } else {
+            alert('Erro ao aplicar o aumento.');
+        }
+    } catch (error) {
+        console.error('Erro ao aplicar o aumento:', error);
+        alert('Erro ao aplicar o aumento. Tente novamente.');
     }
 }
 
-// Função para aplicar a diminuição
+
+// Função para aplicar a diminuição com histórico e undo
 async function aplicarDiminuicao() {
-    const url = await aplicarDiminuicaoBackend(escala.value.fator, selectedImage.value);
-    if (url) {
-        imagemProcessadaUrl.value = url;
-        escala.value.fator=0; // Resetando para valor padrão
+    try {
+        const url = await aplicarDiminuicaoBackend(escala.value.fator, selectedImage.value || imagemProcessadaUrl.value);
+        if (url) {
+            imagemProcessadaUrl.value = url; // Atualiza a imagem processada atual
+            historicoImagensUrl.value.push(imagemProcessadaUrl.value); // Adiciona a imagem ao histórico
+            console.log("Imagens diminuídas:", historicoImagens.value);
+            console.log(historicoImagensUrl);
+
+            escala.value.fator = 0; // Resetando para valor padrão
+        } else {
+            alert('Erro ao aplicar a diminuição.');
+        }
+    } catch (error) {
+        console.error('Erro ao aplicar a diminuição:', error);
+        alert('Erro ao aplicar a diminuição. Tente novamente.');
     }
 }
+
+
+
+// Função para aplicar o grayscale
+async function aplicarGrayscale() {
+    try {
+        const url = await aplicarGrayscaleBackend(selectedImage.value || imagemProcessadaUrl.value);
+        if (url) {
+            imagemProcessadaUrl.value = url; // Atualiza a imagem processada atual
+            historicoImagensUrl.value.push(imagemProcessadaUrl.value); // Adiciona a imagem anterior ao histórico
+            console.log("Imagens convertidas para grayscale:", historicoImagens.value);
+            console.log(historicoImagensUrl);
+        } else {
+            alert('Erro ao aplicar o grayscale.');
+        }
+    } catch (error) {
+        console.error('Erro ao aplicar o grayscale:', error);
+        alert('Erro ao aplicar o grayscale. Tente novamente.');
+    }
+}
+
+// Função para aplicar a limiarização com histórico e undo
+async function aplicarLimiar() {
+    try {
+        const url = await aplicarLimiarBackend(escala.value.fator, selectedImage.value || imagemProcessadaUrl.value);
+        if (url) {
+            imagemProcessadaUrl.value = url; // Atualiza a imagem processada atual
+            historicoImagensUrl.value.push(imagemProcessadaUrl.value); // Adiciona a imagem ao histórico
+            console.log("Imagens limiarizadas:", historicoImagens.value);
+            console.log(historicoImagensUrl);
+
+            escala.value.fator = 0; // Resetando para valor padrão
+        } else {
+            alert('Erro ao aplicar a limiarização.');
+        }
+    } catch (error) {
+        console.error('Erro ao aplicar a limiarização:', error);
+        alert('Erro ao aplicar a limiarização. Tente novamente.');
+    }
+};
+
+// Função para aplicar o filtro de mediana com histórico e undo
+async function aplicarMediana() {
+    try {
+        const url = await aplicarMedianaModalBackend(escala.value.kernelSize, selectedImage.value || imagemProcessadaUrl.value);
+        if (url) {
+            imagemProcessadaUrl.value = url; // Atualiza a imagem processada atual
+            historicoImagensUrl.value.push(imagemProcessadaUrl.value); // Adiciona a imagem ao histórico
+            console.log("Imagens com filtro de mediana:", historicoImagens.value);
+            console.log(historicoImagensUrl);
+
+            escala.value.kernelSize = 3; // Resetando para valor padrão
+        } else {
+            alert('Erro ao aplicar o filtro de mediana.');
+        }
+    } catch (error) {
+        console.error('Erro ao aplicar o filtro de mediana:', error);
+        alert('Erro ao aplicar o filtro de mediana. Tente novamente.');
+    }
+};
+
+// Função para aplicar o filtro Gaussiano
+async function aplicarGaussiano() {
+    try {
+        const url = await aplicarGaussianoBackend(selectedImage.value || imagemProcessadaUrl.value);
+        if (url) {
+            imagemProcessadaUrl.value = url; // Atualiza a imagem processada atual
+            historicoImagensUrl.value.push(imagemProcessadaUrl.value); // Adiciona a imagem ao histórico
+            console.log("Imagens com filtro Gaussiano aplicado:", historicoImagens.value);
+            console.log(historicoImagensUrl);
+        } else {
+            alert('Erro ao aplicar o filtro Gaussiano.');
+        }
+    } catch (error) {
+        console.error('Erro ao aplicar o filtro Gaussiano:', error);
+        alert('Erro ao aplicar o filtro Gaussiano. Tente novamente.');
+    }
+};
+
+// Função para aplicar o filtro Sobel
+async function aplicarSobel() {
+    try {
+        const url = await aplicarSobelBackend(selectedImage.value || imagemProcessadaUrl.value);
+        if (url) {
+            imagemProcessadaUrl.value = url; // Atualiza a imagem processada atual
+            historicoImagensUrl.value.push(imagemProcessadaUrl.value); // Adiciona a imagem ao histórico
+            console.log("Imagens com filtro Sobel aplicado:", historicoImagens.value);
+            console.log(historicoImagensUrl);
+        } else {
+            alert('Erro ao aplicar o filtro Sobel.');
+        }
+    } catch (error) {
+        console.error('Erro ao aplicar o filtro Sobel:', error);
+        alert('Erro ao aplicar o filtro Sobel. Tente novamente.');
+    }
+};
+
+// Função para aplicar o filtro Laplaciano
+async function aplicarLaplaciano() {
+    try {
+        const url = await aplicarLaplacianoBackend(selectedImage.value || imagemProcessadaUrl.value);
+        if (url) {
+            imagemProcessadaUrl.value = url; // Atualiza a imagem processada atual
+            historicoImagensUrl.value.push(imagemProcessadaUrl.value); // Adiciona a imagem ao histórico
+            console.log("Imagens com filtro Laplaciano aplicado:", historicoImagens.value);
+            console.log(historicoImagensUrl);
+        } else {
+            alert('Erro ao aplicar o filtro Laplaciano.');
+        }
+    } catch (error) {
+        console.error('Erro ao aplicar o filtro Laplaciano:', error);
+        alert('Erro ao aplicar o filtro Laplaciano. Tente novamente.');
+    }
+};
+
 
 // Função para lidar com arquivos selecionados
 function onSelectedFiles(event) {

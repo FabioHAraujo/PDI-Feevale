@@ -8,7 +8,13 @@ import {
     abrirDiminuirModal,
     imagemAtual,
     desfazerUltimaOperacao,
-    abrirGrayscaleModal
+    aplicarGrayscale,
+    abrirGrayscaleModal,
+    abrirLimiarModal,
+    abrirMedianaModal,
+    abrirGausianoModal,
+    abrirSobelModal,
+    abrirLaplaceModal
 } from './functions.js';
 
 // Definição do menu com o item "Últimas Imagens" usando a ref quantidadeImagens para o badge
@@ -98,7 +104,7 @@ export const items = ref([
                     {
                         label: 'Limiarização',
                         icon: 'pi pi-circle-on',
-                        command: () => abrirLimiarizacaoModal() // Função que abre o modal para limiarização
+                        command: () => abrirLimiarModal() // Função que abre o modal para limiarização
                     },
                     {
                         label: 'Mediana',

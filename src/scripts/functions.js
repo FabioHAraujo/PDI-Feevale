@@ -87,9 +87,6 @@ export const showGaussianoModal = ref(false);
 export const showSobelModal = ref(false);
 export const showLaplaceModal = ref(false);
 
-
-
-
 export const abrirTransladarModal = () => {
     showTransladarModal.value = true;
 };
@@ -148,15 +145,21 @@ export const abrirRotacionarModal = () => {
     showRotacionarModal.value = true;
 };
 
-// Função para aplicar a rotação
+// Função para aplicar a rotação com histórico e undo
 export const aplicarRotacao = async (angulo, selectedImage) => {
     console.log('Ângulo de rotação:', angulo);
-    console.log('Imagem selecionada:', selectedImage);
 
-    if (typeof angulo === 'number' && selectedImage) {
+    // Usa a última imagem do histórico se houver, caso contrário usa `selectedImage`
+    const imagemEntrada = historicoImagens.value.length > 0 
+        ? historicoImagens.value[historicoImagens.value.length - 1] 
+        : selectedImage;
+
+    console.log('Imagem a ser rotacionada:', imagemEntrada);
+
+    if (typeof angulo === 'number' && imagemEntrada) {
         try {
             const formData = new FormData();
-            formData.append('image', selectedImage);
+            formData.append('image', imagemEntrada);  // Usa a última imagem processada ou a imagem inicial
             formData.append('operation', 'rotacao');
             formData.append('params', angulo.toString());
 
@@ -169,6 +172,11 @@ export const aplicarRotacao = async (angulo, selectedImage) => {
             if (response.status === 200) {
                 console.log('Imagem processada e enviada com sucesso!');
                 const imagemUrl = response.data.url;
+                imagemAtual.value = imagemUrl;
+                
+                // Adiciona a nova imagem processada ao histórico
+                await addImagemAoHistorico(imagemUrl);
+
                 return imagemUrl;
             } else {
                 console.error('Falha ao processar a imagem:', response.data.message);
@@ -178,7 +186,7 @@ export const aplicarRotacao = async (angulo, selectedImage) => {
             console.error('Erro ao enviar a requisição:', error);
             return null;
         } finally {
-            showRotacionarModal.value = false;
+            showRotacionarModal.value = false;  // Fecha o modal
         }
     } else {
         console.error("Ângulo ou imagem inválida.");
@@ -191,23 +199,24 @@ export const abrirEspelharModal = () => {
     showEspelharModal.value = true;
 };
 
-// Função para aplicar o espelhamento
+// Função para aplicar o espelhamento com histórico e undo
 export const aplicarEspelhamento = async (eixo, selectedImage) => {
     console.log('Eixo de espelhamento:', eixo);
-    console.log('Imagem selecionada:', selectedImage);
 
-    if (eixo && selectedImage) {
+    // Usa a última imagem do histórico se houver, caso contrário usa `selectedImage`
+    const imagemEntrada = historicoImagens.value.length > 0 
+        ? historicoImagens.value[historicoImagens.value.length - 1] 
+        : selectedImage;
+
+    console.log('Imagem a ser espelhada:', imagemEntrada);
+
+    if (eixo && imagemEntrada) {
         try {
             const formData = new FormData();
-            formData.append('image', selectedImage);
+            formData.append('image', imagemEntrada);  // Usa a última imagem processada ou a imagem inicial
             formData.append('operation', 'espelhamento');
-            if(eixo==='horizontal'){
-                eixo = 2
-                formData.append('params', eixo);
-            } else if(eixo==='vertical'){
-                eixo = 1
-                formData.append('params', eixo);
-            }
+            const param = eixo === 'horizontal' ? '2' : '1'; // Código do eixo de espelhamento
+            formData.append('params', param);
 
             const response = await axios.post('https://pdi.fabioharaujo.com.br/processar_imagem/', formData, {
                 headers: {
@@ -218,6 +227,11 @@ export const aplicarEspelhamento = async (eixo, selectedImage) => {
             if (response.status === 200) {
                 console.log('Imagem processada e enviada com sucesso!');
                 const imagemUrl = response.data.url;
+                imagemAtual.value = imagemUrl;
+
+                // Adiciona a nova imagem processada ao histórico
+                await addImagemAoHistorico(imagemUrl);
+
                 return imagemUrl;
             } else {
                 console.error('Falha ao processar a imagem:', response.data.message);
@@ -227,7 +241,7 @@ export const aplicarEspelhamento = async (eixo, selectedImage) => {
             console.error('Erro ao enviar a requisição:', error);
             return null;
         } finally {
-            showEspelharModal.value = false;
+            showEspelharModal.value = false; // Fecha o modal
         }
     } else {
         console.error("Eixo ou imagem inválida.");
@@ -241,14 +255,21 @@ export const abrirAumentarModal = () => {
 };
 
 // Função para aplicar o aumento
+// Função para aplicar o aumento com histórico e undo
 export const aplicarAumento = async (fator, selectedImage) => {
     console.log('Fator de aumento:', fator);
-    console.log('Imagem selecionada:', selectedImage);
 
-    if (typeof fator === 'number' && selectedImage) {
+    // Usa a última imagem do histórico se houver, caso contrário usa `selectedImage`
+    const imagemEntrada = historicoImagens.value.length > 0 
+        ? historicoImagens.value[historicoImagens.value.length - 1] 
+        : selectedImage;
+
+    console.log('Imagem a ser aumentada:', imagemEntrada);
+
+    if (typeof fator === 'number' && imagemEntrada) {
         try {
             const formData = new FormData();
-            formData.append('image', selectedImage);
+            formData.append('image', imagemEntrada);  // Usa a última imagem processada ou a imagem inicial
             formData.append('operation', 'escala');
             formData.append('params', fator.toString());
 
@@ -261,6 +282,11 @@ export const aplicarAumento = async (fator, selectedImage) => {
             if (response.status === 200) {
                 console.log('Imagem processada e enviada com sucesso!');
                 const imagemUrl = response.data.url;
+                imagemAtual.value = imagemUrl;
+
+                // Adiciona a nova imagem processada ao histórico
+                await addImagemAoHistorico(imagemUrl);
+
                 return imagemUrl;
             } else {
                 console.error('Falha ao processar a imagem:', response.data.message);
@@ -270,7 +296,7 @@ export const aplicarAumento = async (fator, selectedImage) => {
             console.error('Erro ao enviar a requisição:', error);
             return null;
         } finally {
-            showAumentarModal.value = false;
+            showAumentarModal.value = false;  // Fecha o modal
         }
     } else {
         console.error("Fator ou imagem inválida.");
@@ -278,24 +304,29 @@ export const aplicarAumento = async (fator, selectedImage) => {
     }
 };
 
+
 // Função para abrir o modal de diminuição
 export const abrirDiminuirModal = () => {
     showDiminuirModal.value = true;
 };
 
-// Função para aplicar a diminuição
+// Função para aplicar a diminuição com histórico e undo
 export const aplicarDiminuicao = async (fator, selectedImage) => {
     console.log('Fator de diminuição:', fator);
-    console.log('Imagem selecionada:', selectedImage);
+
+    // Usa a última imagem do histórico se houver, caso contrário usa `selectedImage`
+    const imagemEntrada = historicoImagens.value.length > 0 
+        ? historicoImagens.value[historicoImagens.value.length - 1] 
+        : selectedImage;
 
     // Converte o fator para um valor decimal entre 0 e 1
     const fatorDecimal = 1 / fator;
-    console.log("Decimal: ", fatorDecimal)
+    console.log("Decimal: ", fatorDecimal);
 
-    if (typeof fator === 'number' && selectedImage) {
+    if (typeof fator === 'number' && imagemEntrada) {
         try {
             const formData = new FormData();
-            formData.append('image', selectedImage);
+            formData.append('image', imagemEntrada);  // Usa a última imagem processada ou a imagem inicial
             formData.append('operation', 'escala');
             formData.append('params', fatorDecimal.toString());
 
@@ -308,6 +339,11 @@ export const aplicarDiminuicao = async (fator, selectedImage) => {
             if (response.status === 200) {
                 console.log('Imagem processada e enviada com sucesso!');
                 const imagemUrl = response.data.url;
+                imagemAtual.value = imagemUrl;
+
+                // Adiciona a nova imagem processada ao histórico
+                await addImagemAoHistorico(imagemUrl);
+
                 return imagemUrl;
             } else {
                 console.error('Falha ao processar a imagem:', response.data.message);
@@ -317,13 +353,14 @@ export const aplicarDiminuicao = async (fator, selectedImage) => {
             console.error('Erro ao enviar a requisição:', error);
             return null;
         } finally {
-            showDiminuirModal.value = false;
+            showDiminuirModal.value = false;  // Fecha o modal
         }
     } else {
         console.error("Fator ou imagem inválida.");
         return null;
     }
 };
+
 
 
 // // Filtros
@@ -353,7 +390,7 @@ export const aplicarGrayscale = async (selectedImage) => {
             const formData = new FormData();
             formData.append('image', imagemEntrada);  // Usa a última imagem processada ou a imagem inicial
             formData.append('operation', 'grayscale');
-            formData.append('params', '');  // Não precisa de parâmetros adicionais para a operação de grayscale
+            formData.append('params', 1);  // Não precisa de parâmetros adicionais para a operação de grayscale
 
             const response = await axios.post('https://pdi.fabioharaujo.com.br/processar_imagem/', formData, {
                 headers: {
@@ -378,7 +415,7 @@ export const aplicarGrayscale = async (selectedImage) => {
             console.error('Erro ao enviar a requisição:', error);
             return null;
         } finally {
-            showTransladarModal.value = false;  // Fecha o modal
+            showGrayscaleModal.value = false;  // Fecha o modal
         }
     } else {
         console.error("Imagem inválida.");
@@ -390,14 +427,262 @@ export const abrirLimiarModal = () => {
     showLimiarModal.value = true;
 };
 
+// Função para aplicar limiarização com histórico e undo
+export const aplicarLimiar = async (limiar, selectedImage) => {
+    console.log('Valor de limiar:', limiar);
+
+    // Usa a última imagem do histórico se houver, caso contrário usa `selectedImage`
+    const imagemEntrada = historicoImagens.value.length > 0 
+        ? historicoImagens.value[historicoImagens.value.length - 1] 
+        : selectedImage;
+
+    if (typeof limiar === 'number' && imagemEntrada) {
+        try {
+            const formData = new FormData();
+            formData.append('image', imagemEntrada);  // Usa a última imagem processada ou a imagem inicial
+            formData.append('operation', 'limiarizacao');
+            formData.append('params', limiar.toString());
+
+            const response = await axios.post('https://pdi.fabioharaujo.com.br/processar_imagem/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.status === 200) {
+                console.log('Imagem processada e enviada com sucesso!');
+                const imagemUrl = response.data.url;
+                imagemAtual.value = imagemUrl;
+
+                // Adiciona a nova imagem processada ao histórico
+                await addImagemAoHistorico(imagemUrl);
+
+                return imagemUrl;
+            } else {
+                console.error('Falha ao processar a imagem:', response.data.message);
+                return null;
+            }
+        } catch (error) {
+            console.error('Erro ao enviar a requisição:', error);
+            return null;
+        } finally {
+            showLimiarModal.value = false;  // Fecha o modal
+        }
+    } else {
+        console.error("Limiar ou imagem inválida.");
+        return null;
+    }
+};
+
+
 export const abrirMedianaModal = () => {
     showMedianaModal.value = true;
 };
+
+// Função para aplicar o filtro de mediana com histórico e undo
+export const aplicarMediana = async (kernelSize, selectedImage) => {
+    console.log('Tamanho do kernel para filtro de mediana:', kernelSize);
+
+    // Usa a última imagem do histórico se houver, caso contrário usa `selectedImage`
+    const imagemEntrada = historicoImagens.value.length > 0 
+        ? historicoImagens.value[historicoImagens.value.length - 1] 
+        : selectedImage;
+
+    if (typeof kernelSize === 'number' && imagemEntrada) {
+        try {
+            const formData = new FormData();
+            formData.append('image', imagemEntrada);  // Usa a última imagem processada ou a imagem inicial
+            formData.append('operation', 'mediana');
+            formData.append('params', kernelSize.toString());
+
+            const response = await axios.post('https://pdi.fabioharaujo.com.br/processar_imagem/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.status === 200) {
+                console.log('Imagem processada e enviada com sucesso!');
+                const imagemUrl = response.data.url;
+                imagemAtual.value = imagemUrl;
+
+                // Adiciona a nova imagem processada ao histórico
+                await addImagemAoHistorico(imagemUrl);
+
+                return imagemUrl;
+            } else {
+                console.error('Falha ao processar a imagem:', response.data.message);
+                return null;
+            }
+        } catch (error) {
+            console.error('Erro ao enviar a requisição:', error);
+            return null;
+        } finally {
+            showMedianaModal.value = false;  // Fecha o modal
+        }
+    } else {
+        console.error("Tamanho do kernel ou imagem inválida.");
+        return null;
+    }
+};
+
+export const abrirGausianoModal = () => {
+    showGaussianoModal.value = true;
+}
+
+// Função para aplicar o filtro Gaussiano com histórico e undo
+export const aplicarGaussiano = async (selectedImage) => {
+    console.log('Aplicando filtro Gaussiano');
+
+    // Usa a última imagem do histórico se houver, caso contrário usa `selectedImage`
+    const imagemEntrada = historicoImagens.value.length > 0 
+        ? historicoImagens.value[historicoImagens.value.length - 1] 
+        : selectedImage;
+
+    console.log('Imagem a ser aplicada o filtro Gaussiano:', imagemEntrada);
+
+    if (imagemEntrada) {
+        try {
+            const formData = new FormData();
+            formData.append('image', imagemEntrada);  // Usa a última imagem processada ou a imagem inicial
+            formData.append('operation', 'gaussiano');
+            formData.append('params', 1);  // Não precisa de parâmetros adicionais para o filtro Gaussiano
+
+            const response = await axios.post('https://pdi.fabioharaujo.com.br/processar_imagem/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.status === 200) {
+                console.log('Imagem processada e enviada com sucesso!');
+                const imagemUrl = response.data.url; // URL da imagem processada retornada pela API
+                imagemAtual.value = imagemUrl;
+                
+                // Adiciona a nova imagem processada ao histórico
+                await addImagemAoHistorico(imagemUrl);
+
+                return imagemUrl;
+            } else {
+                console.error('Falha ao processar a imagem:', response.data.message);
+                return null;
+            }
+        } catch (error) {
+            console.error('Erro ao enviar a requisição:', error);
+            return null;
+        } finally {
+            showGaussianoModal.value = false;  // Fecha o modal
+        }
+    } else {
+        console.error("Imagem inválida.");
+        return null;
+    }
+};
+
 
 export const abrirSobelModal = () => {
     showSobelModal.value = true;
 };
 
+// Função para aplicar o filtro Sobel com histórico e undo
+export const aplicarSobel = async (selectedImage) => {
+    console.log('Aplicando filtro Sobel');
+
+    // Usa a última imagem do histórico se houver, caso contrário usa `selectedImage`
+    const imagemEntrada = historicoImagens.value.length > 0 
+        ? historicoImagens.value[historicoImagens.value.length - 1] 
+        : selectedImage;
+
+    console.log('Imagem a ser aplicada o filtro Sobel:', imagemEntrada);
+
+    if (imagemEntrada) {
+        try {
+            const formData = new FormData();
+            formData.append('image', imagemEntrada);  // Usa a última imagem processada ou a imagem inicial
+            formData.append('operation', 'sobel');
+            formData.append('params', 1);  // Não precisa de parâmetros adicionais para o filtro Sobel
+
+            const response = await axios.post('https://pdi.fabioharaujo.com.br/processar_imagem/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.status === 200) {
+                console.log('Imagem processada e enviada com sucesso!');
+                const imagemUrl = response.data.url; // URL da imagem processada retornada pela API
+                imagemAtual.value = imagemUrl;
+                
+                // Adiciona a nova imagem processada ao histórico
+                await addImagemAoHistorico(imagemUrl);
+
+                return imagemUrl;
+            } else {
+                console.error('Falha ao processar a imagem:', response.data.message);
+                return null;
+            }
+        } catch (error) {
+            console.error('Erro ao enviar a requisição:', error);
+            return null;
+        } finally {
+            showSobelModal.value = false;  // Fecha o modal
+        }
+    } else {
+        console.error("Imagem inválida.");
+        return null;
+    }
+};
+
+
 export const abrirLaplaceModal = () => {
     showLaplaceModal.value = true;
+};
+
+// Função para aplicar o filtro Laplaciano com histórico e undo
+export const aplicarLaplaciano = async (selectedImage) => {
+    console.log('Aplicando filtro Laplaciano');
+
+    // Usa a última imagem do histórico se houver, caso contrário usa `selectedImage`
+    const imagemEntrada = historicoImagens.value.length > 0 
+        ? historicoImagens.value[historicoImagens.value.length - 1] 
+        : selectedImage;
+
+    console.log('Imagem a ser aplicada o filtro Laplaciano:', imagemEntrada);
+
+    if (imagemEntrada) {
+        try {
+            const formData = new FormData();
+            formData.append('image', imagemEntrada);  // Usa a última imagem processada ou a imagem inicial
+            formData.append('operation', 'laplaciano');
+            formData.append('params', 1);  // Não precisa de parâmetros adicionais para o filtro Laplaciano
+
+            const response = await axios.post('https://pdi.fabioharaujo.com.br/processar_imagem/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.status === 200) {
+                console.log('Imagem processada e enviada com sucesso!');
+                const imagemUrl = response.data.url; // URL da imagem processada retornada pela API
+                imagemAtual.value = imagemUrl;
+                
+                // Adiciona a nova imagem processada ao histórico
+                await addImagemAoHistorico(imagemUrl);
+
+                return imagemUrl;
+            } else {
+                console.error('Falha ao processar a imagem:', response.data.message);
+                return null;
+            }
+        } catch (error) {
+            console.error('Erro ao enviar a requisição:', error);
+            return null;
+        } finally {
+            showLaplaceModal.value = false;  // Fecha o modal
+        }
+    } else {
+        console.error("Imagem inválida.");
+        return null;
+    }
 };
