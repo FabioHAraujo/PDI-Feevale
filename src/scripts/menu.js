@@ -7,7 +7,8 @@ import {
     abrirAumentarModal,
     abrirDiminuirModal,
     imagemAtual,
-    desfazerUltimaOperacao
+    desfazerUltimaOperacao,
+    abrirGrayscaleModal
 } from './functions.js';
 
 // Definição do menu com o item "Últimas Imagens" usando a ref quantidadeImagens para o badge
@@ -92,26 +93,32 @@ export const items = ref([
                     {
                         label: 'Grayscale',
                         icon: 'pi pi-circle-on',
+                        command: () => abrirGrayscaleModal() // Chama a função aplicarGrayscale
                     },
                     {
                         label: 'Limiarização',
                         icon: 'pi pi-circle-on',
+                        command: () => abrirLimiarizacaoModal() // Função que abre o modal para limiarização
                     },
                     {
                         label: 'Mediana',
                         icon: 'pi pi-circle-on',
+                        command: () => abrirMedianaModal() // Função que abre o modal para aplicar o filtro mediano
                     },
                     {
                         label: 'Gausiano',
                         icon: 'pi pi-circle-on',
+                        command: () => abrirGausianoModal() // Função que abre o modal para aplicar o filtro gaussiano
                     },
                     {
                         label: 'Sobel',
                         icon: 'pi pi-circle-on',
+                        command: () => abrirSobelModal() // Função que abre o modal para aplicar o filtro sobel
                     },
                     {
                         label: 'Laplace (Extra)',
                         icon: 'pi pi-circle-on',
+                        command: () => abrirLaplaceModal() // Função que abre o modal para aplicar o filtro laplaciano
                     },
                 ]
             },

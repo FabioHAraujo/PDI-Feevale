@@ -7,8 +7,9 @@ const imagemModal = ref(null);
 // Controle da imagem
 export const historicoImagens = ref([]);
 export const historicoImagensUrl = ref([]);
+export const redoImagens = ref([]);
+export const redoImagensUrl = ref([]);
 export const imagemAtual = ref(null);
-export const ultimaImagem = ref(null);
 
 
 export const addImagemAoHistorico = async (imagemUrl) => {
@@ -28,9 +29,10 @@ export function addImagem(url){
 
 export function desfazerUltimaOperacao() {
     if (historicoImagens.value.length > 0) {
-        historicoImagensUrl.value.pop();
-        imagemAtual.value = historicoImagensUrl.value.pop();
-        historicoImagens.value.pop();
+        redoImagens.value.push(historicoImagensUrl.value.pop());
+        redoImagensUrl.value.push(historicoImagens.value.pop());
+        console.log("Atual: ", historicoImagensUrl.value[historicoImagensUrl.value.length-2])
+        imagemAtual.value = historicoImagensUrl.value[historicoImagensUrl.value.length-2];
         console.log("Desfeito, atual: ", imagemAtual);
     } else {
         alert('Nenhuma operação para desfazer.');
@@ -84,6 +86,7 @@ export const showMedianaModal = ref(false);
 export const showGaussianoModal = ref(false);
 export const showSobelModal = ref(false);
 export const showLaplaceModal = ref(false);
+
 
 
 
@@ -322,3 +325,79 @@ export const aplicarDiminuicao = async (fator, selectedImage) => {
     }
 };
 
+
+// // Filtros
+// export const showGrayscaleModal = ref(false);
+// export const showLimiarModal = ref(false);
+// export const showMedianaModal = ref(false);
+// export const showGaussianoModal = ref(false);
+// export const showSobelModal = ref(false);
+// export const showLaplaceModal = ref(false);
+
+export const abrirGrayscaleModal = () => {
+    showGrayscaleModal.value = true;
+};
+
+export const aplicarGrayscale = async (selectedImage) => {
+    console.log('Aplicando Grayscale');
+
+    // Usa a última imagem do histórico se houver, caso contrário usa `selectedImage`
+    const imagemEntrada = historicoImagens.value.length > 0 
+        ? historicoImagens.value[historicoImagens.value.length - 1] 
+        : selectedImage;
+
+    console.log('Imagem a ser convertida para grayscale:', imagemEntrada);
+
+    if (imagemEntrada) {
+        try {
+            const formData = new FormData();
+            formData.append('image', imagemEntrada);  // Usa a última imagem processada ou a imagem inicial
+            formData.append('operation', 'grayscale');
+            formData.append('params', '');  // Não precisa de parâmetros adicionais para a operação de grayscale
+
+            const response = await axios.post('https://pdi.fabioharaujo.com.br/processar_imagem/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.status === 200) {
+                console.log('Imagem processada e enviada com sucesso!');
+                const imagemUrl = response.data.url; // URL da imagem processada retornada pela API
+                imagemAtual.value = imagemUrl;
+                
+                // Adiciona a nova imagem processada ao histórico como um arquivo
+                await addImagemAoHistorico(imagemUrl);
+
+                return imagemUrl;
+            } else {
+                console.error('Falha ao processar a imagem:', response.data.message);
+                return null;
+            }
+        } catch (error) {
+            console.error('Erro ao enviar a requisição:', error);
+            return null;
+        } finally {
+            showTransladarModal.value = false;  // Fecha o modal
+        }
+    } else {
+        console.error("Imagem inválida.");
+        return null;
+    }
+};
+
+export const abrirLimiarModal = () => {
+    showLimiarModal.value = true;
+};
+
+export const abrirMedianaModal = () => {
+    showMedianaModal.value = true;
+};
+
+export const abrirSobelModal = () => {
+    showSobelModal.value = true;
+};
+
+export const abrirLaplaceModal = () => {
+    showLaplaceModal.value = true;
+};

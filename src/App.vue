@@ -207,8 +207,9 @@ import {
     aplicarEspelhamento as aplicarEspelhamentoBackend,
     aplicarAumento as aplicarAumentoBackend,
     aplicarDiminuicao as aplicarDiminuicaoBackend,
-    historicoImagens as affsCansei,
-    imagemAtual
+    historicoImagens,
+    imagemAtual,
+    historicoImagensUrl
 } from './scripts/functions.js';
 
 import { items } from './scripts/menu.js';
@@ -224,7 +225,6 @@ const aumento = ref(1); // Número simples para aumento
 const diminuicao = ref(1); // Número simples para diminuição
 const selectedImage = ref(null);  // Variável para armazenar a imagem selecionada
 const imagemProcessadaUrl = ref(null);  // Variável para armazenar a URL da imagem processada
-const historicoImagens = ref([]); // Array para armazenar o histórico de imagens
 const imagemSelecionada = ref(null);
 const espelhamento = ref();
 const eixos = ref([
@@ -274,9 +274,9 @@ async function aplicarTranslacao() {
         const url = await aplicarTranslacaoBackend(translacao.value, selectedImage.value || imagemProcessadaUrl.value);
         if (url) {
             imagemProcessadaUrl.value = url; // Atualiza a imagem processada atual
-            historicoImagens.value.push(imagemProcessadaUrl.value); // Adiciona a imagem anterior ao histórico
+            historicoImagensUrl.value.push(imagemProcessadaUrl.value); // Adiciona a imagem anterior ao histórico
             console.log("Imagens transladadas:", historicoImagens.value);
-            console.log(affsCansei);
+            console.log(historicoImagensUrl);
 
             translacao.value.dx = 0;
             translacao.value.dy = 0;
@@ -288,17 +288,6 @@ async function aplicarTranslacao() {
         alert('Erro ao aplicar a translação. Tente novamente.');
     }
 }
-
-function desfazerUltimaOperacao() {
-    if (historicoImagens.value.length > 0) {
-        imagemProcessadaUrl.value = historicoImagens.value.pop(); // Remove a última imagem do histórico
-        alert('Última operação desfeita.');
-    } else {
-        alert('Não há operações para desfazer.');
-    }
-}
-
-
 
 // Função para aplicar a rotação
 async function aplicarRotacao() {
@@ -348,32 +337,13 @@ function onSelectedFiles(event) {
 // Função para remover um arquivo da lista
 function onRemoveTemplatingFile(file, removeFileCallback, index) {
     removeFileCallback(index);
-    imagemProcessadaUrl.value = null;  // Limpa a URL da imagem processada
+    imagemAtual.value = null;  // Limpa a URL da imagem processada
     historicoImagens.value = []; // Opcional: limpa o histórico
+    historicoImagensUrl.value = []; // Opcional: limpa o histórico
     // Verifica se a imagem removida era a selecionada
     if (imagemSelecionada.value && imagemSelecionada.value.name === file.name) {
         imagemSelecionada.value = null; // Limpa a imagem selecionada
     }
 }
 
-// Funções para abrir os modais
-function openTransladarModal() {
-    abrirTransladarModal();
-}
-
-function openRotacionarModal() {
-    abrirRotacionarModal();
-}
-
-function openEspelharModal() {
-    abrirEspelharModal();
-}
-
-function openAumentarModal() {
-    abrirAumentarModal();
-}
-
-function openDiminuirModal() {
-    abrirDiminuirModal();
-}
 </script>

@@ -149,7 +149,7 @@ async def processar_imagem(
             threshold_value = int(params_list[0])
             img = threshold.threshold_image(img, threshold_value)
 
-        elif operation == 'media':
+        elif operation == 'mediana':
             if len(params_list) != 1:
                 return JSONResponse(status_code=400, content={"message": "Média requer um parâmetro (tamanho do kernel)."})
             kernel_size = int(params_list[0])
