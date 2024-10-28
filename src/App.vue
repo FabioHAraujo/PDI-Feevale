@@ -391,7 +391,7 @@ async function aplicarRotacao() {
 // Função para aplicar o espelhamento com histórico e undo
 async function aplicarEspelhamento() {
     try {
-        const url = await aplicarEspelhamentoBackend(espelhamento.value, selectedImage.value || imagemProcessadaUrl.value);
+        const url = await aplicarEspelhamentoBackend(espelhamento.value.code, selectedImage.value || imagemProcessadaUrl.value);
         if (url) {
             imagemProcessadaUrl.value = url; // Atualiza a imagem processada atual
             historicoImagensUrl.value.push(imagemProcessadaUrl.value); // Adiciona a imagem anterior ao histórico
