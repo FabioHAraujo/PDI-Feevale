@@ -14,6 +14,8 @@ import bright
 import contrast
 import dilate
 import erode
+import opening
+import closing
 import threshold
 import median
 import gaussian
@@ -142,6 +144,18 @@ async def processar_imagem(
                 return JSONResponse(status_code=400, content={"message": "Erosão requer um parâmetro (tamanho do kernel)."})
             kernel_size = int(params_list[0])
             img = erode.erode_image(img, kernel_size)
+            
+        elif operation == 'abertura':
+            if len(params_list) != 1:
+                return JSONResponse(status_code=400, content={"message": "Abertura requer um parâmetro (tamanho do kernel)."})
+            kernel_size = int(params_list[0])
+            img = opening.opening_image(img, kernel_size)
+        
+        elif operation == 'fechamento':
+            if len(params_list) != 1:
+                return JSONResponse(status_code=400, content={"message": "Fechamento requer um parâmetro (tamanho do kernel)."})
+            kernel_size = int(params_list[0])
+            img = closing.closing_image(img, kernel_size)
         
         elif operation == 'limiarizacao':
             if len(params_list) != 1:
