@@ -1,40 +1,30 @@
+import cv2
 import numpy as np
 from PIL import Image
 
 def median_filter(img, kernel_size=3):
-    # Converte a imagem para um array NumPy
+    """
+    Aplica o filtro mediano em uma imagem.
+    :param img: Imagem PIL (RGB ou escala de cinza).
+    :param kernel_size: Tamanho do kernel para o filtro mediano (deve ser ímpar).
+    :return: Imagem PIL resultante após a aplicação do filtro mediano.
+    """
+    # Converter a imagem PIL para NumPy
     img_array = np.array(img)
 
-    # Obtenha as dimensões da imagem
-    height, width, channels = img_array.shape
+    # Aplicar filtro mediano
+    print(f"Aplicando filtro mediano com kernel_size={kernel_size}...")
+    if img_array.ndim == 3:  # Imagem colorida (RGB)
+        # OpenCV requer filtragem por canal para imagens coloridas
+        channels = cv2.split(img_array)
+        filtered_channels = [cv2.medianBlur(channel, kernel_size) for channel in channels]
+        filtered_img = cv2.merge(filtered_channels)
+    else:  # Imagem em escala de cinza
+        filtered_img = cv2.medianBlur(img_array, kernel_size)
 
-    # Crie uma imagem resultante preenchida com zeros (imagem negra)
-    result_array = np.zeros_like(img_array)
+    # Converter o resultado de volta para imagem PIL
+    result_img = Image.fromarray(filtered_img)
 
-    # Calcule o raio do kernel
-    radius = kernel_size // 2
-
-    # Função para calcular a mediana
-    def compute_median(neighbours):
-        return np.median(neighbours)
-
-    # Convolução para filtragem pela mediana
-    for channel in range(channels):
-        for x in range(radius, width - radius):
-            for y in range(radius, height - radius):
-                neighbours = []
-                # Coletar os vizinhos de acordo com o tamanho do kernel
-                for lx in range(-radius, radius + 1):
-                    for ly in range(-radius, radius + 1):
-                        # Obter valores dos vizinhos
-                        neighbours.append(img_array[y + ly, x + lx, channel])
-
-                # Calcular o novo valor
-                new_value = compute_median(neighbours)
-                result_array[y, x, channel] = new_value
-
-    # Converter o array resultante de volta para uma imagem PIL
-    result_img = Image.fromarray(result_array.astype('uint8'))
     return result_img
 
 # Exemplo de uso
@@ -46,7 +36,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     img_path = sys.argv[1]
-
     img = Image.open(img_path)  # Carregar sua imagem
-    filtered_img = median_filter(img)  # Aplicar o filtro de mediana
+    filtered_img = median_filter(img, kernel_size=3)  # Aplicar o filtro de mediana
     filtered_img.save("mediana.jpg")  # Salvar a imagem filtrada
