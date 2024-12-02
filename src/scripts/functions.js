@@ -87,6 +87,12 @@ export const showGaussianoModal = ref(false);
 export const showSobelModal = ref(false);
 export const showLaplaceModal = ref(false);
 
+// Morfologia Matemática
+export const showDilatarModal = ref(false);
+export const showErosaoModal = ref(false);
+export const showAberturaModal = ref(false);
+export const showFechamentoModal = ref(false);
+
 export const abrirTransladarModal = () => {
     showTransladarModal.value = true;
 };
@@ -683,6 +689,204 @@ export const aplicarLaplaciano = async (selectedImage) => {
         }
     } else {
         console.error("Imagem inválida.");
+        return null;
+    }
+};
+
+export const abrirDilatarModal = () => {
+    showDilatarModal.value = true;
+};
+
+// Função para aplicar o filtro Dilatação com histórico e undo
+export const aplicarDilatar = async (kernelSize, selectedImage) => {
+    console.log('Fator de dilatação:', kernelSize);
+
+    // Usa a última imagem do histórico se houver, caso contrário usa `selectedImage`
+    const imagemEntrada = historicoImagens.value.length > 0 
+        ? historicoImagens.value[historicoImagens.value.length - 1] 
+        : selectedImage;
+
+    if (typeof kernelSize === 'number' && imagemEntrada) {
+        try {
+            const formData = new FormData();
+            formData.append('image', imagemEntrada);  // Usa a última imagem processada ou a imagem inicial
+            formData.append('operation', 'dilatacao');
+            formData.append('params', kernelSize.toString());
+
+            const response = await axios.post('https://pdi.fabioharaujo.com.br/processar_imagem/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.status === 200) {
+                console.log('Imagem processada e enviada com sucesso!');
+                const imagemUrl = response.data.url;
+                imagemAtual.value = imagemUrl;
+
+                // Adiciona a nova imagem processada ao histórico
+                await addImagemAoHistorico(imagemUrl);
+
+                return imagemUrl;
+            } else {
+                console.error('Falha ao processar a imagem:', response.data.message);
+                return null;
+            }
+        } catch (error) {
+            console.error('Erro ao enviar a requisição:', error);
+            return null;
+        } finally {
+            showDilatarModal.value = false;  // Fecha o modal
+        }
+    } else {
+        console.error("Tamanho do kernel ou imagem inválida.");
+        return null;
+    }
+};
+
+export const abrirErosaoModal = () => {
+    showErosaoModal.value = true;
+};
+
+// Função para aplicar o filtro Erosão com histórico e undo
+export const aplicarErosao = async (kernelSize, selectedImage) => {
+    console.log('Fator de erosão:', kernelSize);
+
+    const imagemEntrada = historicoImagens.value.length > 0 
+        ? historicoImagens.value[historicoImagens.value.length - 1] 
+        : selectedImage;
+
+    if (typeof kernelSize === 'number' && imagemEntrada) {
+        try {
+            const formData = new FormData();
+            formData.append('image', imagemEntrada);
+            formData.append('operation', 'erosao');
+            formData.append('params', kernelSize.toString());
+
+            const response = await axios.post('https://pdi.fabioharaujo.com.br/processar_imagem/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.status === 200) {
+                console.log('Imagem processada e enviada com sucesso!');
+                const imagemUrl = response.data.url;
+                imagemAtual.value = imagemUrl;
+
+                await addImagemAoHistorico(imagemUrl);
+
+                return imagemUrl;
+            } else {
+                console.error('Falha ao processar a imagem:', response.data.message);
+                return null;
+            }
+        } catch (error) {
+            console.error('Erro ao enviar a requisição:', error);
+            return null;
+        } finally {
+            showErosaoModal.value = false;
+        }
+    } else {
+        console.error("Tamanho do kernel ou imagem inválida.");
+        return null;
+    }
+};
+
+export const abrirAberturaModal = () => {
+    showAberturaModal.value = true;
+};
+
+// Função para aplicar o filtro Abertura com histórico e undo
+export const aplicarAbertura = async (kernelSize, selectedImage) => {
+    console.log('Fator de abertura:', kernelSize);
+
+    const imagemEntrada = historicoImagens.value.length > 0 
+        ? historicoImagens.value[historicoImagens.value.length - 1] 
+        : selectedImage;
+
+    if (typeof kernelSize === 'number' && imagemEntrada) {
+        try {
+            const formData = new FormData();
+            formData.append('image', imagemEntrada);
+            formData.append('operation', 'abertura');
+            formData.append('params', kernelSize.toString());
+
+            const response = await axios.post('https://pdi.fabioharaujo.com.br/processar_imagem/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.status === 200) {
+                console.log('Imagem processada e enviada com sucesso!');
+                const imagemUrl = response.data.url;
+                imagemAtual.value = imagemUrl;
+
+                await addImagemAoHistorico(imagemUrl);
+
+                return imagemUrl;
+            } else {
+                console.error('Falha ao processar a imagem:', response.data.message);
+                return null;
+            }
+        } catch (error) {
+            console.error('Erro ao enviar a requisição:', error);
+            return null;
+        } finally {
+            showAberturaModal.value = false;
+        }
+    } else {
+        console.error("Tamanho do kernel ou imagem inválida.");
+        return null;
+    }
+};
+
+export const abrirFechamentoModal = () => {
+    showFechamentoModal.value = true;
+};
+
+// Função para aplicar o filtro Fechamento com histórico e undo
+export const aplicarFechamento = async (kernelSize, selectedImage) => {
+    console.log('Fator de fechamento:', kernelSize);
+
+    const imagemEntrada = historicoImagens.value.length > 0 
+        ? historicoImagens.value[historicoImagens.value.length - 1] 
+        : selectedImage;
+
+    if (typeof kernelSize === 'number' && imagemEntrada) {
+        try {
+            const formData = new FormData();
+            formData.append('image', imagemEntrada);
+            formData.append('operation', 'fechamento');
+            formData.append('params', kernelSize.toString());
+
+            const response = await axios.post('https://pdi.fabioharaujo.com.br/processar_imagem/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.status === 200) {
+                console.log('Imagem processada e enviada com sucesso!');
+                const imagemUrl = response.data.url;
+                imagemAtual.value = imagemUrl;
+
+                await addImagemAoHistorico(imagemUrl);
+
+                return imagemUrl;
+            } else {
+                console.error('Falha ao processar a imagem:', response.data.message);
+                return null;
+            }
+        } catch (error) {
+            console.error('Erro ao enviar a requisição:', error);
+            return null;
+        } finally {
+            showFechamentoModal.value = false;
+        }
+    } else {
+        console.error("Tamanho do kernel ou imagem inválida.");
         return null;
     }
 };

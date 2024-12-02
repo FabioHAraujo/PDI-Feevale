@@ -14,7 +14,11 @@ import {
     abrirMedianaModal,
     abrirGausianoModal,
     abrirSobelModal,
-    abrirLaplaceModal
+    abrirLaplaceModal,
+    abrirDilatarModal,
+    abrirErosaoModal,
+    abrirAberturaModal,
+    abrirFechamentoModal
 } from './functions.js';
 
 // Definição do menu com o item "Últimas Imagens" usando a ref quantidadeImagens para o badge
@@ -135,20 +139,24 @@ export const items = ref([
                     {
                         label: 'Dilatação',
                         icon: 'pi pi-circle-on',
+                        command: () => abrirDilatarModal() // Função que abre o modal para aplicar Dilatação
                     },
                     {
                         label: 'Erosão',
                         icon: 'pi pi-circle-on',
+                        command: () => abrirErosaoModal() // Função que abre o modal para aplicar Erosão
                     },
                     {
                         label: 'Abertura',
                         icon: 'pi pi-circle-on',
+                        command: () => abrirAberturaModal() // Função que abre o modal para aplicar Abertura
                     },
                     {
                         label: 'Fechamento',
                         icon: 'pi pi-circle-on',
+                        command: () => abrirFechamentoModal() // Função que abre o modal para aplicar Fechamento
                     },
-                ]
+                ]                
             },
             {
                 label: 'Extração de Características',

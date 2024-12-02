@@ -122,7 +122,7 @@
     <!-- Modal de Mediana -->
     <Dialog header="Mediana da Imagem" v-model:visible="showMedianaModal" :modal="true" :closable="true">
         <div>
-            <label for="fator-limiar">Fator de Kernel:</label>
+            <label for="fator-mediana">Fator de Kernel:</label>
             <InputNumber v-model="escala.kernelSize" id="fator-mediana" />
         </div>
         <div class="mt-4 flex justify-end">
@@ -162,6 +162,63 @@
             <Button label="Cancelar" @click="showLaplaceModal = false" class="ml-2" />
         </div>
     </Dialog>
+
+    <!-- Modal de Dilatar -->
+    <Dialog header="Dilatar Imagem" v-model:visible="showDilatarModal" :modal="true" :closable="true">
+        <div>
+            <label for="fator-dilatar">Fator de Dilatação:</label>
+            <InputNumber v-model="escala.kernelSize" id="fator-dilatar" />
+        </div>
+        <div class="mt-4 flex justify-end">
+            <Button label="Aplicar" @click="aplicarDilatar(escala.kernelSize)" />
+        </div>
+    </Dialog>
+
+    <!-- Modal de Erosão -->
+    <Dialog header="Erosão de Imagem" v-model:visible="showErosaoModal" :modal="true" :closable="true">
+        <div>
+            <label for="fator-erosao">Fator de Erosão:</label>
+            <InputNumber v-model="escala.kernelSize" id="fator-erosao" />
+        </div>
+        <div class="mt-4 flex justify-end">
+            <Button label="Aplicar" @click="aplicarErosao(escala.kernelSize)" />
+        </div>
+    </Dialog>
+
+    <!-- Modal de Abertura -->
+    <Dialog header="Abertura de Imagem" v-model:visible="showAberturaModal" :modal="true" :closable="true">
+        <div>
+            <label for="fator-abertura">Fator de Abertura:</label>
+            <InputNumber v-model="escala.kernelSize" id="fator-abertura" />
+        </div>
+        <div class="mt-4 flex justify-end">
+            <Button label="Aplicar" @click="aplicarAbertura(escala.kernelSize)" />
+        </div>
+    </Dialog>
+
+    <!-- Modal de Fechamento -->
+    <Dialog header="Fechamento de Imagem" v-model:visible="showFechamentoModal" :modal="true" :closable="true">
+        <div>
+            <label for="fator-fechamento">Fator de Fechamento:</label>
+            <InputNumber v-model="escala.kernelSize" id="fator-fechamento" />
+        </div>
+        <div class="mt-4 flex justify-end">
+            <Button label="Aplicar" @click="aplicarFechamento(escala.kernelSize)" />
+        </div>
+    </Dialog>
+
+    <!-- Modal de Identificação de Pontos de Dominó -->
+    <Dialog header="Identificar Pontos do Dominó" v-model:visible="showDominóModal" :modal="true" :closable="true">
+        <div>
+            <p>Você deseja identificar a quantidade de pontos por lado do dominó na imagem atual?</p>
+        </div>
+        <div class="mt-4 flex justify-end">
+            <Button label="Sim" @click="identificarPontosDomino" />
+            <Button label="Cancelar" @click="showDominóModal = false" class="ml-2" />
+        </div>
+    </Dialog>
+
+
 
     <div class="card">
         <div class="flex flex-col md:flex-row">
@@ -281,13 +338,21 @@ import {
     aplicarGaussiano as aplicarGaussianoBackend,
     aplicarSobel as aplicarSobelBackend,
     aplicarLaplaciano as aplicarLaplacianoBackend,
+    aplicarDilatar as aplicarDilatarBackend,
+    aplicarErosao as aplicarErosaoBackend,
+    aplicarAbertura as aplicarAberturaBackend,
+    aplicarFechamento as aplicarFechamentoBackend,
     historicoImagens,
     imagemAtual,
     historicoImagensUrl,
     showMedianaModal,
     showGaussianoModal,
     showSobelModal,
-    showLaplaceModal
+    showLaplaceModal,
+    showDilatarModal,
+    showErosaoModal,
+    showAberturaModal,
+    showFechamentoModal
 } from './scripts/functions.js';
 
 import { items } from './scripts/menu.js';
@@ -563,6 +628,87 @@ async function aplicarLaplaciano() {
         alert('Erro ao aplicar o filtro Laplaciano. Tente novamente.');
     }
 };
+
+// Função para aplicar o filtro de dilatação com histórico e undo
+async function aplicarDilatar() {
+    try {
+        const url = await aplicarDilatarBackend(escala.value.kernelSize, selectedImage.value || imagemProcessadaUrl.value);
+        if (url) {
+            imagemProcessadaUrl.value = url; // Atualiza a imagem processada atual
+            historicoImagensUrl.value.push(imagemProcessadaUrl.value); // Adiciona a imagem ao histórico
+            console.log("Imagens com dilatação:", historicoImagens.value);
+            console.log(historicoImagensUrl);
+
+            escala.value.kernelSize = 3; // Resetando para valor padrão
+        } else {
+            alert('Erro ao aplicar dilatação.');
+        }
+    } catch (error) {
+        console.error('Erro ao aplicar a dilatação:', error);
+        alert('Erro ao aplicar a dilatação. Tente novamente.');
+    }
+};
+
+// Função para aplicar o filtro de erosão com histórico e undo
+async function aplicarErosao() {
+    try {
+        const url = await aplicarErosaoBackend(escala.value.kernelSize, selectedImage.value || imagemProcessadaUrl.value);
+        if (url) {
+            imagemProcessadaUrl.value = url; // Atualiza a imagem processada atual
+            historicoImagensUrl.value.push(imagemProcessadaUrl.value); // Adiciona a imagem ao histórico
+            console.log("Imagens com erosão:", historicoImagens.value);
+            console.log(historicoImagensUrl);
+
+            escala.value.kernelSize = 3; // Resetando para valor padrão
+        } else {
+            alert('Erro ao aplicar erosão.');
+        }
+    } catch (error) {
+        console.error('Erro ao aplicar a erosão:', error);
+        alert('Erro ao aplicar a erosão. Tente novamente.');
+    }
+};
+
+// Função para aplicar o filtro de abertura com histórico e undo
+async function aplicarAbertura() {
+    try {
+        const url = await aplicarAberturaBackend(escala.value.kernelSize, selectedImage.value || imagemProcessadaUrl.value);
+        if (url) {
+            imagemProcessadaUrl.value = url; // Atualiza a imagem processada atual
+            historicoImagensUrl.value.push(imagemProcessadaUrl.value); // Adiciona a imagem ao histórico
+            console.log("Imagens com abertura:", historicoImagens.value);
+            console.log(historicoImagensUrl);
+
+            escala.value.kernelSize = 3; // Resetando para valor padrão
+        } else {
+            alert('Erro ao aplicar abertura.');
+        }
+    } catch (error) {
+        console.error('Erro ao aplicar a abertura:', error);
+        alert('Erro ao aplicar a abertura. Tente novamente.');
+    }
+};
+
+// Função para aplicar o filtro de fechamento com histórico e undo
+async function aplicarFechamento() {
+    try {
+        const url = await aplicarFechamentoBackend(escala.value.kernelSize, selectedImage.value || imagemProcessadaUrl.value);
+        if (url) {
+            imagemProcessadaUrl.value = url; // Atualiza a imagem processada atual
+            historicoImagensUrl.value.push(imagemProcessadaUrl.value); // Adiciona a imagem ao histórico
+            console.log("Imagens com fechamento:", historicoImagens.value);
+            console.log(historicoImagensUrl);
+
+            escala.value.kernelSize = 3; // Resetando para valor padrão
+        } else {
+            alert('Erro ao aplicar fechamento.');
+        }
+    } catch (error) {
+        console.error('Erro ao aplicar o fechamento:', error);
+        alert('Erro ao aplicar o fechamento. Tente novamente.');
+    }
+};
+
 
 
 // Função para lidar com arquivos selecionados
