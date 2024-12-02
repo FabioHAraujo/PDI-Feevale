@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.responses import JSONResponse
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
+import numpy as np
 import os
 import mirror
 import rotate
@@ -22,8 +23,9 @@ import gaussian
 import sobel
 import prewitt
 import laplacian
+import domino
 
-app = FastAPI()
+app = FastAPI(strict_slashes=False)
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -180,7 +182,19 @@ async def processar_imagem(
 
         elif operation == 'laplaciano':
             img = laplacian.laplacian_filter(img)
+        
+        elif operation == 'domino':
+            param = params_list[0] if params_list else 1
+            resultados = domino.process_domino(img)
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "message": "Processamento de dominó concluído.",
+                    "resultados": resultados,
+                }
+            )
 
+            
         else:
             return JSONResponse(status_code=400, content={"message": "Operação inválida."})
 
@@ -192,4 +206,4 @@ async def processar_imagem(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=39000)
+    uvicorn.run(app, host="0.0.0.0", port=34000)

@@ -5,10 +5,14 @@ def sobel_filter(img):
     # Converte a imagem para um array NumPy
     img_array = np.array(img)
 
-    # Obtenha as dimensões da imagem
-    height, width, channels = img_array.shape
+    # Verificar se a imagem tem canais ou é em escala de cinza
+    if img_array.ndim == 2:  # Imagem em escala de cinza
+        height, width = img_array.shape
+        channels = 1
+    else:  # Imagem com múltiplos canais (RGB)
+        height, width, channels = img_array.shape
 
-    # Crie uma imagem resultante preenchida com zeros (imagem negra)
+    # Criar uma imagem resultante preenchida com zeros
     result_array = np.zeros_like(img_array)
 
     # Máscaras de Sobel
@@ -36,14 +40,24 @@ def sobel_filter(img):
         return min(value, 255)  # Limitar o valor máximo a 255
 
     # Aplicar a convolução usando o filtro Sobel
-    for channel in range(channels):
+    if channels == 1:  # Imagem em escala de cinza
         for x in range(1, width - 1):
             for y in range(1, height - 1):
-                new_value = compute_pixel(img_array[:, :, channel], x, y)
-                result_array[y, x, channel] = new_value
+                new_value = compute_pixel(img_array, x, y)
+                result_array[y, x] = new_value
+    else:  # Imagem com múltiplos canais
+        for channel in range(channels):
+            for x in range(1, width - 1):
+                for y in range(1, height - 1):
+                    new_value = compute_pixel(img_array[:, :, channel], x, y)
+                    result_array[y, x, channel] = new_value
 
     # Converter o array resultante de volta para uma imagem PIL
-    result_img = Image.fromarray(result_array.astype('uint8'))
+    if channels == 1:  # Se for escala de cinza, remover o canal extra
+        result_img = Image.fromarray(result_array.astype('uint8'))
+    else:  # Caso contrário, manter a estrutura de múltiplos canais
+        result_img = Image.fromarray(result_array.astype('uint8'), mode="RGB")
+    
     return result_img
 
 # Exemplo de uso
