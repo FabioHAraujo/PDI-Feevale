@@ -93,6 +93,10 @@ export const showErosaoModal = ref(false);
 export const showAberturaModal = ref(false);
 export const showFechamentoModal = ref(false);
 
+// Desafio de extração
+export const showDominoModal = ref(false);
+
+
 export const abrirTransladarModal = () => {
     showTransladarModal.value = true;
 };
@@ -887,6 +891,57 @@ export const aplicarFechamento = async (kernelSize, selectedImage) => {
         }
     } else {
         console.error("Tamanho do kernel ou imagem inválida.");
+        return null;
+    }
+};
+
+
+export const abrirDominoModal = () => {
+    showDominoModal.value = true;
+};
+
+
+export const identificarPontosDomino = async (selectedImage) => {
+    console.log('Identificando pontos do dominó');
+
+    // Usa a última imagem do histórico se houver, caso contrário usa `selectedImage`
+    const imagemEntrada = historicoImagens.value.length > 0 
+        ? historicoImagens.value[historicoImagens.value.length - 1] 
+        : selectedImage;
+
+    console.log('Imagem para identificar pontos do dominó:', imagemEntrada);
+
+    if (imagemEntrada) {
+        try {
+            const formData = new FormData();
+            formData.append('image', imagemEntrada); // Usa a última imagem processada ou a imagem inicial
+            formData.append('operation', 'domino'); // Operação específica para identificar pontos do dominó
+            formData.append('params', 1);  // Não precisa de parâmetros adicionais para a operação de grayscale
+
+            const response = await axios.post('https://pdi.fabioharaujo.com.br/processar_imagem/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.status === 200) {
+                console.log('Processamento de dominó concluído!');
+                console.log('Resultados:', response.data.resultados);
+
+                // Retorna os resultados com os pontos identificados
+                return response.data.resultados;
+            } else {
+                console.error('Falha ao processar a imagem:', response.data.message);
+                return null;
+            }
+        } catch (error) {
+            console.error('Erro ao enviar a requisição:', error);
+            return null;
+        } finally {
+            showDominoModal.value = false; // Fecha o modal
+        }
+    } else {
+        console.error("Imagem inválida.");
         return null;
     }
 };

@@ -18,7 +18,8 @@ import {
     abrirDilatarModal,
     abrirErosaoModal,
     abrirAberturaModal,
-    abrirFechamentoModal
+    abrirFechamentoModal,
+    abrirDominoModal
 } from './functions.js';
 
 // Definição do menu com o item "Últimas Imagens" usando a ref quantidadeImagens para o badge
@@ -163,8 +164,9 @@ export const items = ref([
                 icon: 'pi pi-chevron-right',
                 items: [
                     {
-                        label: 'Desafio',
+                        label: 'Contar Dominó',
                         icon: 'pi pi-star-fill',
+                        command: () => abrirDominoModal()
                     },
                 ]
             }

@@ -208,13 +208,13 @@
     </Dialog>
 
     <!-- Modal de Identificação de Pontos de Dominó -->
-    <Dialog header="Identificar Pontos do Dominó" v-model:visible="showDominóModal" :modal="true" :closable="true">
+    <Dialog header="Identificar Pontos do Dominó" v-model:visible="showDominoModal" :modal="true" :closable="true">
         <div>
             <p>Você deseja identificar a quantidade de pontos por lado do dominó na imagem atual?</p>
         </div>
         <div class="mt-4 flex justify-end">
             <Button label="Sim" @click="identificarPontosDomino" />
-            <Button label="Cancelar" @click="showDominóModal = false" class="ml-2" />
+            <Button label="Cancelar" @click="showDominoModal = false" class="ml-2" />
         </div>
     </Dialog>
 
@@ -342,6 +342,7 @@ import {
     aplicarErosao as aplicarErosaoBackend,
     aplicarAbertura as aplicarAberturaBackend,
     aplicarFechamento as aplicarFechamentoBackend,
+    identificarPontosDomino as identificarPontosDominoBackend,
     historicoImagens,
     imagemAtual,
     historicoImagensUrl,
@@ -352,7 +353,8 @@ import {
     showDilatarModal,
     showErosaoModal,
     showAberturaModal,
-    showFechamentoModal
+    showFechamentoModal,
+    showDominoModal
 } from './scripts/functions.js';
 
 import { items } from './scripts/menu.js';
@@ -708,6 +710,23 @@ async function aplicarFechamento() {
         alert('Erro ao aplicar o fechamento. Tente novamente.');
     }
 };
+
+// Função para identificar os pontos do dominó
+async function identificarPontosDomino() {
+    try {
+        const resultados = await identificarPontosDominoBackend(selectedImage.value || imagemProcessadaUrl.value);
+        if (resultados) {
+            console.log("Resultados da identificação do dominó:", resultados);
+            alert(`Pontos identificados:\nLado 1: ${resultados.pontos_lado_1}\nLado 2: ${resultados.pontos_lado_2}`);
+        } else {
+            alert('Erro ao identificar os pontos do dominó.');
+        }
+    } catch (error) {
+        console.error('Erro ao identificar os pontos do dominó:', error);
+        alert('Erro ao identificar os pontos do dominó. Tente novamente.');
+    }
+}
+
 
 
 
